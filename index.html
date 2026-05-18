@@ -16,12 +16,15 @@
 --font:'Inter','Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
 --section-pad:clamp(60px,10vh,120px);
 }
-html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;scroll-padding-top:82px}
 body{font-family:var(--font);color:var(--black);background:var(--white);overflow-x:hidden;line-height:1.5}
+
+/* ===== TOP FIXED BAR ===== */
+.top-fixed-bar{position:fixed;top:0;left:0;right:0;z-index:9999}
 
 /* ===== NAV ===== */
 .nav-glass{
-position:fixed;top:0;left:0;right:0;z-index:9999;
+  position:relative;left:0;right:0;
 background:rgba(255,255,255,.82);
 backdrop-filter:saturate(180%) blur(20px);
 -webkit-backdrop-filter:saturate(180%) blur(20px);
@@ -415,13 +418,16 @@ font-size:13px;font-weight:500;
 </head>
 <body>
 
+<!-- TOP FIXED BAR -->
+<div class="top-fixed-bar">
+
 <!-- ANNOUNCEMENT BANNER -->
 <div class="announce-banner">
 <strong>6月11日 20:00 新品首发</strong> &nbsp;|&nbsp; ROMO 2 系列 现已开启预约 &nbsp;|&nbsp; 水箱版 3999 元起
 </div>
 
 <!-- NAV -->
-<div class="nav-glass" id="nav" style="top:36px">
+<div class="nav-glass" id="nav">
   <div class="nav-inner">
     <a href="#hero" class="nav-logo"><i class="fas fa-robot" style="color:var(--blue)"></i> ROMO 2<span>培训</span></a>
     <div class="nav-links" id="navLinks">
@@ -438,6 +444,8 @@ font-size:13px;font-weight:500;
     </div>
   </div>
 </div>
+
+</div><!-- /top-fixed-bar -->
 
 <!-- HERO -->
 <div class="hero" id="hero">
