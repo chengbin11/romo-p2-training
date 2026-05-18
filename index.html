@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR820 ROMO 2 内部培训系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--black:#1d1d1f;--gray:#86868b;--light-gray:#f5f5f7;--white:#fff;
+--blue:#0071e3;--blue-hover:#0077ED;--link:#2997ff;
+--green:#30d158;--red:#ff3b30;--orange:#ff9f0a;
+--purple:#5856d6;--pink:#ff6b9d;
+--font:'Inter','Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
+--section-pad:clamp(60px,10vh,120px);
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);color:var(--black);background:var(--white);overflow-x:hidden;line-height:1.5}
+
+/* ===== NAV ===== */
+.nav-glass{
+position:fixed;top:0;left:0;right:0;z-index:9999;
+background:rgba(255,255,255,.82);
+backdrop-filter:saturate(180%) blur(20px);
+-webkit-backdrop-filter:saturate(180%) blur(20px);
+border-bottom:1px solid rgba(0,0,0,.08);
+transition:all .3s;
+}
+.nav-glass.scrolled{box-shadow:0 1px 12px rgba(0,0,0,.06)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:48px}
+.nav-logo{font-size:16px;font-weight:700;color:var(--black);display:flex;align-items:center;gap:8px;text-decoration:none}
+.nav-logo span{font-size:11px;font-weight:500;color:var(--gray);background:var(--light-gray);padding:2px 8px;border-radius:4px}
+.nav-links{display:flex;gap:0}
+.nav-links a{
+font-size:12px;font-weight:500;color:var(--gray);text-decoration:none;
+padding:8px 14px;border-radius:8px;transition:all .25s;letter-spacing:.01em;
+white-space:nowrap;
+}
+.nav-links a:hover,.nav-links a.active{color:var(--blue)}
+@media(max-width:900px){
+.nav-links{display:none;position:absolute;top:48px;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);padding:12px;border-bottom:1px solid rgba(0,0,0,.08);flex-direction:column}
+.nav-links.open{display:flex}
+.nav-toggle{display:flex!important}
+}
+.nav-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px}
+.nav-toggle span{display:block;width:18px;height:1.5px;background:var(--black);transition:.3s}
+
+/* ===== HERO ===== */
+.hero{
+min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+text-align:center;padding:120px 24px 80px;
+background:linear-gradient(180deg,#000 0%,#111 100%);
+color:var(--white);position:relative;overflow:hidden;
+}
+.hero-eyebrow{font-size:clamp(14px,2vw,18px);color:var(--orange);font-weight:600;letter-spacing:.04em;margin-bottom:12px;text-transform:uppercase}
+.hero h1{font-size:clamp(40px,8vw,80px);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-bottom:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(16px,2.5vw,24px);color:rgba(255,255,255,.6);font-weight:400;max-width:600px;margin:0 auto 12px;line-height:1.5}
+.hero-price{font-size:clamp(20px,3vw,32px);font-weight:700;color:var(--white);margin:16px auto 0}
+.hero-price small{font-size:.5em;font-weight:400;color:rgba(255,255,255,.5)}
+.hero-img-wrap{width:100%;max-width:900px;margin:32px auto 0;position:relative}
+.hero-img-wrap img{width:100%;border-radius:16px;display:block}
+.hero-cta{margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-apple{
+display:inline-flex;align-items:center;gap:8px;
+padding:14px 28px;border-radius:980px;font-size:16px;font-weight:500;
+text-decoration:none;transition:all .3s;border:none;cursor:pointer;font-family:var(--font);
+}
+.btn-blue{background:var(--blue);color:var(--white)}
+.btn-blue:hover{background:var(--blue-hover);transform:scale(1.04)}
+.btn-outline{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn-outline:hover{background:var(--blue);color:var(--white)}
+.btn-white{background:var(--white);color:var(--black)}
+.btn-white:hover{background:var(--light-gray);transform:scale(1.04)}
+.btn-ghost{background:rgba(255,255,255,.12);color:var(--white);border:1px solid rgba(255,255,255,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.btn-sm{padding:10px 20px;font-size:14px}
+.btn-orange{background:var(--orange);color:var(--white)}
+.btn-orange:hover{background:#e88e09;transform:scale(1.04)}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.4);font-size:13px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+
+/* ===== SECTIONS ===== */
+.section{padding:var(--section-pad) 24px}
+.section-dark{background:#000;color:var(--white)}
+.section-gray{background:var(--light-gray)}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-eyebrow{font-size:clamp(14px,2vw,18px);color:var(--link);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:clamp(32px,5vw,56px);font-weight:800;letter-spacing:-.025em;line-height:1.08;margin-bottom:16px}
+.section-desc{font-size:clamp(16px,2vw,21px);color:var(--gray);font-weight:400;max-width:680px;line-height:1.6}
+.section-dark .section-desc{color:rgba(255,255,255,.6)}
+.text-center{text-align:center}
+.mx-auto{margin-left:auto;margin-right:auto}
+
+/* ===== FEATURES GRID ===== */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:48px}
+.feature-card{
+background:var(--white);border-radius:24px;padding:40px 32px;
+border:1px solid rgba(0,0,0,.06);transition:all .4s;
+position:relative;overflow:hidden;
+}
+.section-dark .feature-card,.section-gray .feature-card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08);color:var(--white)}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.08)}
+.feature-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px}
+.feature-card h3{font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
+.feature-card p{font-size:15px;color:var(--gray);line-height:1.6}
+.section-dark .feature-card p{color:rgba(255,255,255,.5)}
+.feature-num{font-size:56px;font-weight:900;letter-spacing:-.04em;background:linear-gradient(135deg,var(--blue),#5856d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.feature-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.feature-compare div{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600}
+.feature-compare .old{background:#fff3f3;color:#ff3b30}
+.feature-compare .new{background:#e8fce8;color:#1a8a1a}
+.section-dark .feature-compare .old{background:rgba(255,59,48,.15);color:#ff6961}
+.section-dark .feature-compare .new{background:rgba(48,209,88,.15);color:#30d158}
+
+/* ===== PRODUCT SHOWCASE ===== */
+.showcase{padding:var(--section-pad) 0;overflow:hidden}
+.showcase-dark{background:#000;color:var(--white)}
+.showcase-inner{max-width:1200px;margin:0 auto;padding:0 24px}
+.showcase-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.showcase-reverse .showcase-grid{direction:rtl}
+.showcase-reverse .showcase-grid > *{direction:ltr}
+.showcase-text{max-width:480px}
+.showcase-text .section-eyebrow{margin-bottom:6px}
+.showcase-text .section-title{font-size:clamp(28px,4vw,44px);margin-bottom:12px}
+.showcase-text .section-desc{margin-bottom:28px}
+.showcase-img{border-radius:20px;overflow:hidden;aspect-ratio:4/3}
+.showcase-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+.showcase-img:hover img{transform:scale(1.03)}
+.showcase-img-full{margin-top:40px;border-radius:20px;overflow:hidden;max-width:1200px;margin-left:auto;margin-right:auto}
+.showcase-img-full img{width:100%;display:block;border-radius:20px}
+.showcase-img-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px}
+.showcase-img-row div{border-radius:16px;overflow:hidden;aspect-ratio:1}
+.showcase-img-row div img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:900px){.showcase-grid{grid-template-columns:1fr;gap:32px}.showcase-reverse .showcase-grid{direction:ltr}}
+
+/* ===== SELLING POINTS ===== */
+.sell-points{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:40px}
+.sell-point{
+padding:24px;border-radius:16px;background:var(--light-gray);
+display:flex;gap:16px;align-items:flex-start;
+transition:all .3s;
+}
+.section-dark .sell-point{background:rgba(255,255,255,.06)}
+.sell-point:hover{transform:translateX(4px)}
+.sell-point i{color:var(--blue);font-size:20px;margin-top:2px;flex-shrink:0}
+.section-dark .sell-point i{color:var(--link)}
+.sell-point h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.sell-point p{font-size:13px;color:var(--gray);line-height:1.5}
+.section-dark .sell-point p{color:rgba(255,255,255,.5)}
+
+/* ===== SPEC TABLE ===== */
+.spec-table-wrap{overflow-x:auto;margin-top:40px;border-radius:20px;border:1px solid rgba(0,0,0,.08)}
+.spec-table{width:100%;border-collapse:collapse;font-size:14px}
+.spec-table th{background:var(--black);color:var(--white);padding:16px 20px;text-align:left;font-weight:600;white-space:nowrap}
+.spec-table td{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.06)}
+.spec-table tr:last-child td{border-bottom:none}
+.spec-table tr:nth-child(even) td{background:rgba(0,0,0,.02)}
+.spec-table .highlight{color:var(--blue);font-weight:700}
+.spec-new{display:inline-block;background:var(--blue);color:var(--white);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+
+/* ===== HIGHLIGHT BOX ===== */
+.highlight-box{
+background:linear-gradient(135deg,#fef3c7,#fde68a);border-left:4px solid var(--orange);
+padding:20px 24px;border-radius:0 16px 16px 0;margin:24px 0;font-size:14px;line-height:1.7;
+}
+.section-dark .highlight-box{background:linear-gradient(135deg,rgba(255,159,10,.1),rgba(255,159,10,.05));border-left-color:var(--orange)}
+
+/* ===== TABS ===== */
+.tab-bar{display:flex;gap:4px;background:var(--light-gray);border-radius:12px;padding:4px;margin:32px 0;width:fit-content}
+.section-dark .tab-bar{background:rgba(255,255,255,.08)}
+.tab-btn{padding:10px 24px;border-radius:8px;border:none;background:transparent;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font);color:var(--gray);transition:all .25s}
+.tab-btn.active{background:var(--white);color:var(--black);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.section-dark .tab-btn.active{background:rgba(255,255,255,.12);color:var(--white)}
+.tab-panel{display:none;animation:fadeUp .4s ease}
+.tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== Q&A ===== */
+.qa-search-wrap{max-width:600px;margin:0 auto 32px;position:relative}
+.qa-search-wrap input{
+width:100%;padding:16px 20px 16px 48px;border:none;border-radius:12px;
+background:var(--light-gray);font-size:16px;font-family:var(--font);outline:none;
+transition:all .3s;
+}
+.qa-search-wrap input:focus{box-shadow:0 0 0 4px rgba(0,113,227,.15);background:var(--white)}
+.qa-search-wrap i{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:16px}
+.qa-cat-bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.qa-cat-pill{
+padding:8px 18px;border-radius:980px;border:1px solid rgba(0,0,0,.1);
+background:transparent;font-size:13px;font-weight:500;cursor:pointer;
+font-family:var(--font);transition:all .25s;color:var(--gray);
+}
+.qa-cat-pill:hover,.qa-cat-pill.active{background:var(--black);color:var(--white);border-color:var(--black)}
+.qa-list{max-width:800px;margin:0 auto;display:grid;gap:8px}
+.qa-item{
+border-radius:16px;border:1px solid rgba(0,0,0,.06);overflow:hidden;
+transition:all .3s;background:var(--white);
+}
+.qa-item:hover{border-color:rgba(0,0,0,.12)}
+.qa-q{display:flex;align-items:center;gap:14px;padding:20px 24px;cursor:pointer;font-weight:600;font-size:15px}
+.qa-q .badge{
+background:linear-gradient(135deg,var(--blue),#5856d6);color:var(--white);
+width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+font-size:12px;font-weight:800;flex-shrink:0;
+}
+.qa-a{display:none;padding:0 24px 20px 66px;font-size:14px;color:var(--gray);line-height:1.7}
+.qa-item.open .qa-a{display:block}
+
+/* ===== EXAM ===== */
+.exam-container{max-width:800px;margin:0 auto}
+.exam-start{text-align:center;padding:80px 24px}
+.exam-start h2{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.02em;margin-bottom:12px}
+.exam-start>p{color:var(--gray);font-size:17px;margin-bottom:40px}
+.exam-rules{
+background:var(--light-gray);border-radius:20px;padding:32px;max-width:500px;
+margin:0 auto 40px;text-align:left;
+}
+.exam-rules h4{font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.exam-rules ul{list-style:none}
+.exam-rules li{padding:8px 0;font-size:14px;display:flex;align-items:flex-start;gap:10px;color:var(--gray)}
+.exam-rules li i{color:var(--blue);margin-top:3px}
+.exam-name-input{
+padding:14px 18px;border:1.5px solid rgba(0,0,0,.1);border-radius:12px;
+font-size:16px;font-family:var(--font);width:240px;outline:none;transition:all .3s;
+}
+.exam-name-input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,113,227,.1)}
+.exam-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.exam-stat{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--gray)}
+.exam-stat strong{color:var(--blue);font-weight:700}
+.exam-timer{font-size:18px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:6px}
+.exam-timer.warn{color:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.exam-progress{height:4px;background:var(--light-gray);border-radius:2px;margin-bottom:32px;overflow:hidden}
+.exam-progress-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .5s}
+.eq{background:var(--white);border-radius:20px;border:1px solid rgba(0,0,0,.06);padding:32px;margin-bottom:16px}
+.eq-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.eq-num{width:36px;height:36px;border-radius:50%;background:var(--blue);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.eq-type{padding:3px 10px;border-radius:980px;font-size:11px;font-weight:700;letter-spacing:.02em}
+.eq-type.s{background:#dbeafe;color:#1d4ed8}
+.eq-type.m{background:#fef3c7;color:#92400e}
+.eq-type.j{background:#dcfce7;color:#166534}
+.eq-score{margin-left:auto;font-size:13px;color:var(--gray)}
+.eq-text{font-size:17px;font-weight:600;line-height:1.6;margin-bottom:20px}
+.eq-opts{display:grid;gap:10px}
+.eq-opt{display:flex;align-items:center;gap:14px;padding:14px 18px;border:2px solid rgba(0,0,0,.08);border-radius:14px;cursor:pointer;transition:all .25s;font-size:15px}
+.eq-opt:hover{border-color:var(--blue);background:rgba(0,113,227,.03)}
+.eq-opt.sel{border-color:var(--blue);background:rgba(0,113,227,.06)}
+.eq-opt.ok{border-color:#16a34a;background:#f0fdf4}
+.eq-opt.no{border-color:#dc2626;background:#fef2f2}
+.eq-letter{width:32px;height:32px;border-radius:50%;border:2px solid rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;transition:all .25s}
+.eq-opt.sel .eq-letter{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.eq-opt.ok .eq-letter{background:#16a34a;color:var(--white);border-color:#16a34a}
+.eq-opt.no .eq-letter{background:#dc2626;color:var(--white);border-color:#dc2626}
+.exam-actions{display:flex;gap:12px;justify-content:center;padding:24px 0 48px}
+
+/* ===== RESULTS ===== */
+.exam-result{text-align:center;padding:64px 24px;display:none}
+.exam-result.show{display:block}
+.res-circle{width:180px;height:180px;border-radius:50%;margin:0 auto 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.res-circle svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.res-score{font-size:52px;font-weight:900;letter-spacing:-.03em}
+.res-label{font-size:14px;opacity:.7}
+.res-circle.pass{background:linear-gradient(135deg,#dcfce7,#bbf7d0);color:#166534}
+.res-circle.fail{background:linear-gradient(135deg,#fef2f2,#fecaca);color:#991b1b}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:440px;margin:24px auto}
+.res-stat{padding:16px;border-radius:16px;background:var(--light-gray)}
+.res-stat .v{font-size:24px;font-weight:800}
+.res-stat .l{font-size:13px;color:var(--gray);margin-top:2px}
+.res-stat.g .v{color:#16a34a}
+.res-stat.r .v{color:#dc2626}
+.res-stat.b .v{color:var(--blue)}
+.analysis{text-align:left;margin-top:40px}
+.analysis h3{font-size:20px;font-weight:700;margin-bottom:16px}
+.ana-item{padding:20px;border-radius:16px;border:1px solid rgba(0,0,0,.06);margin-bottom:8px}
+.ana-item.ok{border-left:4px solid #16a34a}
+.ana-item.no{border-left:4px solid #dc2626}
+.ana-q{font-weight:600;font-size:15px;margin-bottom:8px}
+.ana-explain{font-size:13px;color:var(--gray);background:var(--light-gray);padding:12px 16px;border-radius:12px;margin-top:8px;line-height:1.7}
+
+/* ===== SCOREBOARD ===== */
+.score-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+.score-card{text-align:center;padding:28px 16px;border-radius:20px;background:var(--light-gray)}
+.score-card .n{font-size:36px;font-weight:900;letter-spacing:-.03em}
+.score-card .l{font-size:13px;color:var(--gray);margin-top:4px}
+.score-table-wrap{border-radius:20px;border:1px solid rgba(0,0,0,.06);overflow:hidden;padding:20px}
+.score-filter-row{display:flex;gap:10px;align-items:center;margin-bottom:16px;justify-content:flex-end}
+.score-filter-row select{padding:7px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;color:#374151}
+.btn-sm{padding:7px 14px;background:#f3f4f6;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;color:#374151;display:inline-flex;align-items:center;gap:6px;transition:background .2s}
+.btn-sm:hover{background:#e5e7eb}
+.score-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.score-tbl th{background:var(--black);color:var(--white);padding:14px 20px;text-align:left;font-weight:600}
+.score-tbl td{padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.06)}
+.score-tbl tr:last-child td{border-bottom:none}
+.score-tbl tr:hover td{background:var(--light-gray)}
+.score-badge{padding:4px 12px;border-radius:980px;font-size:12px;font-weight:700;display:inline-block}
+.badge-pass{background:#dcfce7;color:#166534}
+.badge-fail{background:#fef2f2;color:#991b1b}
+.empty{text-align:center;padding:80px 24px;color:var(--gray)}
+.empty i{font-size:48px;margin-bottom:16px;display:block;opacity:.3}
+
+/* ===== SCRIPTS / LIVE STREAMER ===== */
+.script-section{overflow:hidden}
+.script-flow{display:flex;gap:4px;margin:32px 0 40px;overflow-x:auto;padding-bottom:8px}
+.script-flow::-webkit-scrollbar{height:4px}
+.script-flow::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px}
+.script-step{
+flex-shrink:0;padding:12px 24px;border-radius:12px;
+background:var(--light-gray);font-size:13px;font-weight:600;
+cursor:pointer;transition:all .3s;border:2px solid transparent;
+}
+.script-step:hover,.script-step.active{border-color:var(--blue);color:var(--blue);transform:translateY(-2px)}
+.script-step .step-num{display:block;font-size:10px;font-weight:800;color:var(--gray);margin-bottom:2px}
+.script-panel{
+background:var(--white);border:1px solid rgba(0,0,0,.06);
+border-radius:20px;padding:40px;animation:fadeUp .4s ease;
+}
+.script-panel h3{font-size:24px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.script-panel h3 .step-icon{
+width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+font-size:18px;flex-shrink:0;
+}
+.script-panel .tip{font-size:13px;color:var(--gray);margin-bottom:24px;font-style:italic}
+.script-block{
+background:var(--light-gray);border-radius:16px;padding:24px;margin-bottom:16px;
+border-left:4px solid var(--blue);
+}
+.script-block .label{
+font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+margin-bottom:8px;color:var(--blue);
+}
+.script-block .words{font-size:15px;line-height:1.8;color:var(--black)}
+.script-block.golden{
+background:linear-gradient(135deg,#fef3c7,#fde68a);border-left-color:var(--orange);
+}
+.script-block.golden .label{color:var(--orange)}
+.script-block.closing{
+background:linear-gradient(135deg,#dcfce7,#bbf7d0);border-left-color:var(--green);
+}
+.script-block.closing .label{color:#16a34a}
+
+/* Golden Quotes Grid */
+.golden-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:32px}
+.golden-card{
+padding:24px;border-radius:16px;background:var(--white);
+border:1px solid rgba(0,0,0,.06);transition:all .3s;
+cursor:default;position:relative;
+}
+.golden-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.08)}
+.golden-card .quote{font-size:15px;font-weight:600;line-height:1.7;margin-bottom:8px}
+.golden-card .scene{font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px}
+.golden-card .scene i{color:var(--orange)}
+.golden-card .copy-btn{
+position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;
+background:var(--light-gray);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+color:var(--gray);font-size:12px;transition:all .2s;
+}
+.golden-card .copy-btn:hover{background:var(--blue);color:var(--white)}
+
+/* Comparison - P2 vs A2 */
+.price-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:40px}
+.price-card{
+border-radius:24px;padding:40px 32px;text-align:center;
+border:2px solid rgba(0,0,0,.06);transition:all .3s;
+}
+.price-card.featured{border-color:var(--blue);box-shadow:0 20px 60px rgba(0,113,227,.12)}
+.price-card h3{font-size:28px;font-weight:800;margin-bottom:4px}
+.price-card .model-tag{font-size:13px;font-weight:600;color:var(--blue);background:rgba(0,113,227,.08);padding:4px 12px;border-radius:980px;display:inline-block;margin-bottom:16px}
+.price-card .price{font-size:40px;font-weight:900;margin-bottom:8px}
+.price-card .price small{font-size:14px;font-weight:400;color:var(--gray)}
+.price-card .price-note{font-size:13px;color:var(--gray);margin-bottom:24px}
+.price-card ul{list-style:none;text-align:left;font-size:14px}
+.price-card li{padding:8px 0;display:flex;align-items:center;gap:10px}
+.price-card li i{color:var(--green);font-size:14px}
+
+/* ===== FOOTER ===== */
+.footer{text-align:center;padding:40px 24px;color:var(--gray);font-size:12px;border-top:1px solid rgba(0,0,0,.06)}
+.footer-dark{border-top-color:rgba(255,255,255,.08);color:rgba(255,255,255,.4)}
+
+/* ===== SCROLL ANIM ===== */
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+.score-cards{grid-template-columns:repeat(2,1fr)}
+.showcase-img-row{grid-template-columns:1fr}
+.hero-cta{flex-direction:column;align-items:center}
+.price-cards{grid-template-columns:1fr}
+.golden-grid{grid-template-columns:1fr}
+.script-panel{padding:24px}
+.nav-links a{padding:8px 12px;font-size:11px}
+}
+
+/* ===== COMPARE HERO ===== */
+.compare-hero{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;margin:40px 0}
+.compare-item{text-align:center}
+.compare-item img{width:200px;border-radius:16px;display:block;margin:0 auto 12px}
+.compare-item h4{font-size:14px;font-weight:600;color:var(--gray)}
+.compare-vs{font-size:24px;font-weight:800;color:var(--orange)}
+
+/* ===== Announcement Banner ===== */
+.announce-banner{
+background:linear-gradient(90deg,var(--blue),var(--purple));
+color:var(--white);text-align:center;padding:10px 24px;
+font-size:13px;font-weight:500;
+}
+.announce-banner strong{font-weight:700}
+</style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BANNER -->
+<div class="announce-banner">
+<strong>6月11日 20:00 新品首发</strong> &nbsp;|&nbsp; ROMO 2 系列 现已开启预约 &nbsp;|&nbsp; 水箱版 4999 元起
+</div>
+
+<!-- NAV -->
+<div class="nav-glass" id="nav" style="top:36px">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo"><i class="fas fa-robot" style="color:var(--blue)"></i> ROMO 2<span>培训</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="#hero" class="active" onclick="navTo(event,'hero')">首页</a>
+      <a href="#kb" onclick="navTo(event,'kb')">知识库</a>
+      <a href="#pricing" onclick="navTo(event,'pricing')">价格</a>
+      <a href="#qa" onclick="navTo(event,'qa')">问答</a>
+      <a href="#scripts" onclick="navTo(event,'scripts')">话术</a>
+      <a href="#exam" onclick="navTo(event,'exam')">考试</a>
+      <a href="#score" onclick="navTo(event,'score')">评分</a>
+    </div>
+    <div class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-eyebrow reveal">DJI Clean Robot</div>
+  <h1 class="reveal reveal-delay-1">ROMO 2 系列<br><em>AI 超幅扫拖机器人</em></h1>
+  <p class="hero-sub reveal reveal-delay-2">家净，即入佳境。无人机级感知，36000Pa 聚能吸力，123° 超幅外摆机械臂</p>
+  <div class="hero-price reveal reveal-delay-2">ROMO P2 水箱版 <span style="color:var(--orange)">¥4,999</span> 起 &nbsp;<small>· 自动上下水版 ¥5,299 起</small></div>
+  <div class="hero-img-wrap reveal reveal-delay-2">
+    <img src="assets/slide4_图片 3_0.png" alt="ROMO 2 Product">
+  </div>
+  <div class="hero-cta reveal reveal-delay-3">
+    <a href="#kb" class="btn-apple btn-blue"><i class="fas fa-book-open"></i> 开始学习</a>
+    <a href="#scripts" class="btn-apple btn-orange"><i class="fas fa-microphone"></i> 主播话术</a>
+    <a href="#exam" class="btn-apple btn-ghost"><i class="fas fa-file-alt"></i> 参加考试</a>
+  </div>
+  <div class="scroll-hint"><i class="fas fa-chevron-down"></i> 向下滚动</div>
+</div>
+
+<!-- OVERVIEW STATS -->
+<div class="section section-gray">
+  <div class="section-inner">
+    <div class="features-grid reveal">
+      <div class="feature-card"><div class="feature-num">36000Pa</div><p>聚能吸力系统，行业领先级别</p></div>
+      <div class="feature-card"><div class="feature-num">123°</div><p>超幅外摆机械臂，边角全覆盖</p></div>
+      <div class="feature-card"><div class="feature-num">8.5cm</div><p>双层动态越障，门槛轻松跨</p></div>
+      <div class="feature-card"><div class="feature-num">365天</div><p>基站免维护，真正解放双手</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== KB SECTIONS ====== -->
+<!-- CH1: 外观设计 -->
+<div class="section" id="kb">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Chapter 01</div>
+      <h2 class="section-title mx-auto">全新设计，家居艺术品</h2>
+      <p class="section-desc mx-auto">太空舱极简基站设计，纯净简洁配色。机器人半透明设计，展现整齐有序内部结构。高度仅 249mm，远低于行业平均水平。</p>
+    </div>
+    <div class="showcase-img-full reveal" style="margin-top:48px">
+      <img src="assets/slide6_图片 20_3.png" alt="ROMO 2 Silver">
+    </div>
+    <div class="showcase-img-row reveal" style="margin-top:16px">
+      <div><img src="assets/slide6_图片 3_0.png" alt="Silver Detail"></div>
+      <div><img src="assets/slide6_图片 4_1.png" alt="Silver Detail"></div>
+      <div><img src="assets/slide6_图片 15_2.png" alt="Silver Detail"></div>
+    </div>
+    <div class="sell-points reveal">
+      <div class="sell-point"><i class="fas fa-door-open"></i><div><h4>舱门电动开关</h4><p>无需手动操作，电动开合更便捷</p></div></div>
+      <div class="sell-point"><i class="fas fa-palette"></i><div><h4>黑白双色饰板</h4><p>舱门 & 基站门饰板双色可选，搭配家居风格</p></div></div>
+      <div class="sell-point"><i class="fas fa-pen-fancy"></i><div><h4>DIY 贴纸</h4><p>个性化定制基站外观</p></div></div>
+      <div class="sell-point"><i class="fas fa-ruler-vertical"></i><div><h4>高度仅 249mm</h4><p>超薄基站设计，远低于行业平均水平</p></div></div>
+      <div class="sell-point"><i class="fas fa-eye"></i><div><h4>半透明机身</h4><p>展现整齐有序内部结构，机械美学</p></div></div>
+    </div>
+    <div class="highlight-box reveal">
+      <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+      <strong>卖点话术：</strong>全新超薄基站高度仅 249mm，远低于行业平均水平。电动舱门 + 双色饰板 + DIY贴纸 + 半透明机器人设计，让基站完美融入家居，既是清洁好帮手，更是家居艺术品。
+    </div>
+  </div>
+</div>
+
+<!-- CH2: AI感知与避障 -->
+<div class="section showcase-dark showcase" id="s-obstacle">
+  <div class="showcase-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Chapter 02</div>
+      <h2 class="section-title mx-auto">AI 全维感知 · 智能避障 2.0</h2>
+      <p class="section-desc mx-auto">无人机同源感知系统。面阵散斑投影激光雷达 + 双目鱼眼视觉 + 侧面面阵ToF + 机械臂激光雷达，毫米级感知，AI 推理概念迁移。</p>
+    </div>
+    <div class="showcase-img-full reveal">
+      <img src="assets/slide10_图片 22_3.png" alt="Obstacle Avoidance">
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(0,113,227,.1);color:var(--blue)"><i class="fas fa-paw"></i></div>
+        <h3>宠物场景优化</h3>
+        <p>精准识别宠物隔尿垫、食盆和玩具，主动绕行，告别碾压泄漏与拖拽。</p>
+        <div class="showcase-img" style="margin-top:16px;aspect-ratio:16/10"><img src="assets/slide11_Picture 2_0.jpg" alt="Pet Scene"></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(255,159,10,.1);color:var(--orange)"><i class="fas fa-chair"></i></div>
+        <h3>复杂家具场景</h3>
+        <p>准确判断 3-6cm 低矮横杆，流畅绕行，高于 6cm 悬空障碍物基本不碰蹭。</p>
+        <div class="showcase-img" style="margin-top:16px;aspect-ratio:16/10"><img src="assets/slide11_Picture 4_1.jpg" alt="Furniture Scene"></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(88,86,214,.1);color:#5856d6"><i class="fas fa-moon"></i></div>
+        <h3>暗光场景优化</h3>
+        <p>底部显尘灯投射均匀光毯，暗光环境清晰识别脏污与障碍，柔和不扰人。</p>
+        <div class="showcase-img" style="margin-top:16px;aspect-ratio:16/10"><img src="assets/slide11_Picture 6_2.jpg" alt="Dark Scene"></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(48,209,88,.1);color:var(--green)"><i class="fas fa-glass-water"></i></div>
+        <h3>透明物体 + AI 推理</h3>
+        <p>玻璃、镜子等透明障碍物精准识别。AI 推理概念迁移，从未见过的障碍也能自主绕开。</p>
+        <div class="showcase-img" style="margin-top:16px;aspect-ratio:1/1"><img src="assets/slide12_图片 10_1.png" alt="Transparent"></div>
+      </div>
+    </div>
+    <div class="highlight-box reveal">
+      <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+      <strong>卖点话术：</strong>智能避障 2.0 — 无人机同源感知系统！2mm 粗的线缆都能精准识别绕开。四大场景全面升级：宠物用品不碾压、复杂家具不卡困、暗光环境也精准、玻璃茶几看得见。还有 AI 推理，从没见过的杂物也能自主绕开！
+    </div>
+  </div>
+</div>
+
+<!-- CH3: AI 智能清洁决策 -->
+<div class="section section-gray">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Chapter 03</div>
+      <h2 class="section-title mx-auto">AI 智能清洁决策</h2>
+      <p class="section-desc mx-auto">根据脏污类型自动切换清洁策略，用户零预处理。</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-couch"></i></div>
+        <h3>地毯自动增压</h3>
+        <p>识别地毯后自动增强吸力，专攻深层积灰，有效清除顽固积灰。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-droplet"></i></div>
+        <h3>液体污渍应对</h3>
+        <p>调动超幅机械臂精准清洁液体污渍，防止扩散，先拖后吸。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-route"></i></div>
+        <h3>智能规划路线</h3>
+        <p>优先走主通道，智能复拖，自动抬升拖布，清洁效率最大化。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-hand-sparkles"></i></div>
+        <h3>用户零预处理</h3>
+        <p>无需预先收拾房间和做规划，拿起手机点一下就出门，回家就是干净的。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH4: 机械足越障 -->
+<div class="section">
+  <div class="section-inner">
+    <div class="showcase-grid reveal">
+      <div class="showcase-text">
+        <div class="section-eyebrow">Chapter 04</div>
+        <h2 class="section-title">机械足动态越障</h2>
+        <p class="section-desc">全屋无阻，门槛滑轨轻松跨越。动态自适应机械足，智能预判并抬升轮足。</p>
+        <div class="feature-compare" style="margin-top:24px">
+          <div class="old">前代：2.5cm</div>
+          <div class="new">新品：单层 4.5cm / 双层 8.5cm</div>
+        </div>
+        <div class="sell-points" style="margin-top:24px">
+          <div class="sell-point"><i class="fas fa-arrow-up"></i><div><h4>抬升通过门槛</h4></div></div>
+          <div class="sell-point"><i class="fas fa-arrows-left-right"></i><div><h4>贴地滑过门槛</h4></div></div>
+          <div class="sell-point"><i class="fas fa-ban"></i><div><h4>不跨越门槛</h4></div></div>
+        </div>
+        <div class="highlight-box" style="margin-top:20px">
+          <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+          <strong>卖点话术：</strong>机械足动态越障，单层 4.5cm、双层 8.5cm，前代仅 2.5cm！三种门槛策略灵活选择，轮足抬升设计不卷轻薄地毯，全屋门槛滑轨轻松跨。
+        </div>
+      </div>
+      <div class="showcase-img" style="aspect-ratio:16/9">
+        <img src="assets/slide15_图片 8_0.png" alt="Climbing">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH5: 36000Pa 吸力 -->
+<div class="section section-gray">
+  <div class="section-inner">
+    <div class="showcase-grid showcase-reverse reveal">
+      <div class="showcase-text">
+        <div class="section-eyebrow">Chapter 05</div>
+        <h2 class="section-title">36000Pa 聚能吸力</h2>
+        <p class="section-desc">行业领先吸力系统。AI 视觉机器学习识别场景，纯视觉判断地毯/地板/颗粒物/液体/灰尘，自动调节吸力。</p>
+        <div class="feature-compare">
+          <div class="old">前代：25000Pa</div>
+          <div class="new">新品：36000Pa（+44%）</div>
+        </div>
+        <div class="sell-points" style="margin-top:24px">
+          <div class="sell-point"><i class="fas fa-eye"></i><div><h4>纯视觉机器学习</h4><p>AI 实时识别 5 种清洁场景</p></div></div>
+          <div class="sell-point"><i class="fas fa-road"></i><div><h4>窄道优化</h4><p>狭窄空间也能强力清扫</p></div></div>
+          <div class="sell-point"><i class="fas fa-circle-dot"></i><div><h4>颗粒物识别</h4><p>自动增压应对颗粒垃圾</p></div></div>
+          <div class="sell-point"><i class="fas fa-droplet"></i><div><h4>液体识别</h4><p>识别液体自动调节策略</p></div></div>
+          <div class="sell-point"><i class="fas fa-smog"></i><div><h4>重度灰尘识别</h4><p>大颗粒灰尘强力吸入</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="showcase-img" style="aspect-ratio:1/1"><img src="assets/slide17_Picture 2_0.png" alt="Suction"></div>
+        <div class="showcase-img" style="aspect-ratio:16/9;margin-top:12px"><img src="assets/slide18_图片 2_0.jpg" alt="Suction AI"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH6: 颗粒不打飞 毛发不缠绕 -->
+<div class="section">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Chapter 06</div>
+      <h2 class="section-title mx-auto">颗粒不打飞<br>毛发不缠绕</h2>
+      <p class="section-desc mx-auto">DualSweep 双重覆盖结构 + 全新金属挡片，全机身防缠绕，彻底解决清洁痛点。</p>
+    </div>
+    <div class="showcase-img-full reveal" style="max-width:900px">
+      <img src="assets/slide19_Picture 4_0.png" alt="Brush System">
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ecfdf5;color:#059669"><i class="fas fa-wind"></i></div>
+        <h3>双束边刷</h3>
+        <p>120° 大角度双毛束设计，毛发缠绕率降低 30% 以上。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-box"></i></div>
+        <h3>全新尘盒设计</h3>
+        <p>可变开口流线型设计，通道面积更大，大颗粒与长毛发吸入更轻松。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-gear"></i></div>
+        <h3>全新金属挡片</h3>
+        <p>根据风量自动调节开口尺寸，大小垃圾轻松吸入。</p>
+      </div>
+    </div>
+    <div class="showcase-grid reveal" style="margin-top:40px">
+      <div class="showcase-img" style="aspect-ratio:1/1"><img src="assets/slide20_图片 22_2.png" alt="Brush Detail"></div>
+      <div class="showcase-text" style="display:flex;flex-direction:column;justify-content:center">
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px">边刷摆出 · 直墙无死角清洁</h3>
+        <div class="sell-points">
+          <div class="sell-point"><i class="fas fa-check-circle"></i><div><h4>内直角墙角/墙根</h4></div></div>
+          <div class="sell-point"><i class="fas fa-check-circle"></i><div><h4>复杂家具底部深处</h4></div></div>
+          <div class="sell-point"><i class="fas fa-check-circle"></i><div><h4>密集家具腿边缘</h4></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box reveal">
+      <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+      <strong>卖点话术：</strong>DualSweep 双重覆盖结构 + 全新金属挡片，颗粒物不打飞，毛发缠绕率降低 30% 以上！边刷还能摆出，墙角、家具底、桌腿边，无死角全覆盖。养宠家庭必备！
+    </div>
+  </div>
+</div>
+
+<!-- CH7: 超幅外摆拖布 -->
+<div class="section showcase-dark showcase">
+  <div class="showcase-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Chapter 07</div>
+      <h2 class="section-title mx-auto">123° 超幅外摆机械臂</h2>
+      <p class="section-desc mx-auto">外摆距离 12.4cm，较上代多覆盖 4.5cm。配合雷达自适应贴边定位，圆盘拖布最大下压力。</p>
+    </div>
+    <div class="compare-hero reveal">
+      <div class="compare-item">
+        <img src="assets/slide26_图片 1_0.jpg" alt="ROMO P" style="max-height:240px;object-fit:contain">
+        <h4>ROMO P (前代)</h4>
+      </div>
+      <div class="compare-vs">vs</div>
+      <div class="compare-item">
+        <img src="assets/slide27_图片 12_0.jpg" alt="ROMO P2" style="max-height:240px;object-fit:contain">
+        <h4>ROMO P2 (新品)</h4>
+      </div>
+    </div>
+    <div class="spec-table-wrap reveal" style="max-width:700px;margin:0 auto">
+      <table class="spec-table">
+        <tr><th>参数</th><th>ROMO P（前代）</th><th>ROMO P2（新品）</th></tr>
+        <tr><td>外扩角度</td><td>68°</td><td class="highlight">123°</td></tr>
+        <tr><td>外扩距离</td><td>4.4cm</td><td class="highlight">12.4cm</td></tr>
+        <tr><td>边角多覆盖</td><td>—</td><td class="highlight">+4.5cm<span class="spec-new">NEW</span></td></tr>
+      </table>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);padding:12px 20px;margin:0">*测试数据源自大疆实验室，拖地效率以3cm半径绕柱场景100%覆盖所需时间计算</p>
+    </div>
+    <div class="features-grid reveal" style="margin-top:40px">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(0,113,227,.1);color:var(--link)"><i class="fas fa-satellite-dish"></i></div>
+        <h3>摆臂避障雷达</h3>
+        <p>机械臂上独立激光雷达，拖地过程实时感知障碍物，丝滑摆动。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(255,159,10,.1);color:var(--orange)"><i class="fas fa-arrows-up-down"></i></div>
+        <h3>全向浮动拖布盘</h3>
+        <p>大角度自适应不平整地面，圆盘结构提供最大下压力与地面接触面积。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(48,209,88,.1);color:var(--green)"><i class="fas fa-droplet"></i></div>
+        <h3>凌空净拖</h3>
+        <p>液体清洁能力更进一步。行走轮/边刷/万向轮均不弄脏机身。</p>
+      </div>
+    </div>
+    <div class="showcase-img-row reveal" style="max-width:900px;margin:40px auto 0">
+      <div><img src="assets/slide27_Picture 2_2.jpg" alt="Mop Scene 1"></div>
+      <div><img src="assets/slide27_Picture 4_3.jpg" alt="Mop Scene 2"></div>
+      <div><img src="assets/slide27_Picture 6_4.jpg" alt="Mop Scene 3"></div>
+    </div>
+    <div class="highlight-box reveal" style="max-width:800px;margin:32px auto 0">
+      <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+      <strong>卖点话术：</strong>外摆距离从 4.4cm 提升到 12.4cm，外扩角度从 68° 提升到 123°！一次外摆比上代多覆盖 4.5cm！机械臂上自带雷达精准贴边，圆盘拖布下压力最大，拖地效率提升 130%。
+    </div>
+  </div>
+</div>
+
+<!-- CH8: 365天基站免维护 -->
+<div class="section">
+  <div class="section-inner">
+    <div class="showcase-grid reveal">
+      <div class="showcase-text">
+        <div class="section-eyebrow">Chapter 08</div>
+        <h2 class="section-title">365天基站免维护</h2>
+        <p class="section-desc">十重健康关怀体系，全年免维护。微晶盾托盘 + 污水箱自洁 + 高温热水洗 + 消毒浸泡洗。</p>
+        <div class="sell-points">
+          <div class="sell-point"><i class="fas fa-shield-halved"></i><div><h4>纳米级微晶盾托盘</h4><p>污渍油垢难附着，清水一冲即净</p></div></div>
+          <div class="sell-point"><i class="fas fa-shower"></i><div><h4>污水箱自清洁</h4><p>自动高压水流冲洗内壁，告别手动掏洗</p></div></div>
+          <div class="sell-point"><i class="fas fa-circle-dot"></i><div><h4>16mm 超大吸污口</h4><p>四路高压水柱清洗，高效排走污水</p></div></div>
+          <div class="sell-point"><i class="fas fa-fire"></i><div><h4>高温热水洗</h4><p>80°C 高温杀菌（前代 60°C），深层杀灭细菌</p></div></div>
+          <div class="sell-point"><i class="fas fa-virus-slash"></i><div><h4>消毒浸泡洗</h4><p>除菌清洁液按比例注入，充分渗透纤维<span class="spec-new">NEW</span></p></div></div>
+          <div class="sell-point"><i class="fas fa-wind"></i><div><h4>十重健康关怀</h4><p>水路六重 + 风路四重，银离子+除臭+烘干+UV杀菌</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="showcase-img" style="aspect-ratio:3/4"><img src="assets/slide31_图片 7_0.png" alt="Station"></div>
+      </div>
+    </div>
+    <div class="highlight-box reveal">
+      <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+      <strong>卖点话术：</strong>365 天基站免维护！纳米级微晶盾托盘不沾油垢，污水箱高压自冲洗。80°C 高温洗（前代才 60°C）+ 消毒浸泡洗是新增功能，拖布银离子 + 清水箱银离子 + 污水箱除臭 + UV灯杀菌 + 烘干，十重健康关怀，全链路抑菌！
+    </div>
+  </div>
+</div>
+
+<!-- CH9: 噪音优化 + 快充 -->
+<div class="section section-gray">
+  <div class="section-inner">
+    <div class="showcase-grid showcase-reverse reveal">
+      <div class="showcase-text">
+        <div class="section-eyebrow">Chapter 09</div>
+        <h2 class="section-title">静音快充，不扰生活</h2>
+        <p class="section-desc">32 种声学降噪材料全链路覆盖，集尘时过滤 85% 噪音。55W 快充 2.5h 满电。</p>
+        <div class="feature-compare">
+          <div class="old">前代：80% 噪音优化</div>
+          <div class="new">新品：85% 噪音过滤</div>
+        </div>
+        <div class="sell-points" style="margin-top:24px">
+          <div class="sell-point"><i class="fas fa-bolt"></i><div><h4>55W 快充</h4><p>充满仅需 2.5h，安静单扫续航 3h</p></div></div>
+          <div class="sell-point"><i class="fas fa-volume-low"></i><div><h4>32 种降噪材料</h4><p>机器人行走 + 清洁 + 基站集尘全链路</p></div></div>
+          <div class="sell-point"><i class="fas fa-baby"></i><div><h4>消音舱设计</h4><p>集尘时过滤 85% 噪音，宝宝睡觉也不怕</p></div></div>
+        </div>
+      </div>
+      <div class="showcase-img" style="aspect-ratio:16/10">
+        <img src="assets/slide43_Picture 2_0.jpg" alt="Noise">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH10: DJI Home App -->
+<div class="section">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Chapter 10</div>
+      <h2 class="section-title mx-auto">DJI Home App 智能体验</h2>
+      <p class="section-desc mx-auto">脏污热力图、全场景语音控制、远程视频通话、家庭共享。优雅简洁的交互体验。</p>
+    </div>
+    <div class="showcase-img-full reveal" style="max-width:1000px">
+      <img src="assets/slide44_图片 27_1.png" alt="DJI Home App">
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fef3c7;color:#b45309"><i class="fas fa-paw"></i></div>
+        <h3>宠物模式</h3>
+        <p>加大吸力、降低速度、边角清洁更细致。路径：设备设置 → 我家有宠物</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-chart-pie"></i></div>
+        <h3>脏污热力图</h3>
+        <p>精细呈现地面脏污情况，地图上一站式个性化编辑。<span class="spec-new">NEW</span></p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-microphone"></i></div>
+        <h3>语音助手</h3>
+        <p>呼唤"小莫小莫"，一句话开启清洁，适配第三方智能音箱</p>
+      </div>
+    </div>
+    <div class="features-grid reveal" style="margin-top:16px">
+      <div class="feature-card"><h3>55W 快充</h3><p>充满仅需 2.5 小时，安静单扫续航可达 3 小时</p></div>
+      <div class="feature-card"><h3>视频通话</h3><p>远程了解家里情况，密码保护 + 数据加密</p></div>
+      <div class="feature-card"><h3>家庭共享</h3><p>最多 10 名家庭成员，多层地图最多 4 张</p></div>
+    </div>
+    <div class="highlight-box reveal">
+      <i class="fas fa-lightbulb" style="color:var(--orange);margin-right:6px"></i>
+      <strong>卖点话术：</strong>55W 快充 2.5h 满电，安静单扫 3h 超长续航。说一声"小莫小莫"就开扫，脏污热力图一眼看清哪里脏。视频通话、家庭共享、多层地图全支持，全链路降噪 85%，宝宝睡觉也不怕。
+    </div>
+  </div>
+</div>
+
+<!-- ====== PRICING ====== -->
+<div class="section section-gray" id="pricing">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Pricing</div>
+      <h2 class="section-title mx-auto">产品价格与型号</h2>
+      <p class="section-desc mx-auto">ROMO 2 系列包含 ROMO P2 和 ROMO A2 两款型号，2026年6月11日20:00 正式发售</p>
+    </div>
+    <div class="price-cards reveal">
+      <div class="price-card">
+        <span class="model-tag">旗舰款</span>
+        <h3>ROMO P2</h3>
+        <div class="price">¥4,999 <small>起</small></div>
+        <div class="price-note">水箱版 ¥4,999 · 自动上下水版 ¥5,299</div>
+        <ul>
+          <li><i class="fas fa-check-circle"></i> 36000Pa 聚能吸力</li>
+          <li><i class="fas fa-check-circle"></i> 123° 超幅外摆机械臂</li>
+          <li><i class="fas fa-check-circle"></i> 智能避障 2.0 + AI推理</li>
+          <li><i class="fas fa-check-circle"></i> 8.5cm 双层动态越障</li>
+          <li><i class="fas fa-check-circle"></i> 365天基站免维护</li>
+          <li><i class="fas fa-check-circle"></i> 80°C 高温洗 + 消毒浸泡</li>
+          <li><i class="fas fa-check-circle"></i> 十重健康关怀体系</li>
+          <li><i class="fas fa-check-circle"></i> 85% 噪音过滤</li>
+          <li><i class="fas fa-check-circle"></i> DJI Home App 全功能</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <span class="model-tag" style="background:rgba(255,159,10,.1);color:var(--orange)">超值之选</span>
+        <h3>ROMO A2</h3>
+        <div class="price" style="color:var(--blue)">¥5,499 <small>起</small></div>
+        <div class="price-note">水箱版 · 自动上下水版 ¥5,999</div>
+        <ul>
+          <li><i class="fas fa-check-circle"></i> 36000Pa 聚能吸力</li>
+          <li><i class="fas fa-check-circle"></i> 123° 超幅外摆机械臂</li>
+          <li><i class="fas fa-check-circle"></i> 智能避障 2.0 + AI推理</li>
+          <li><i class="fas fa-check-circle"></i> 8.5cm 双层动态越障</li>
+          <li><i class="fas fa-check-circle"></i> 365天基站免维护</li>
+          <li><i class="fas fa-check-circle"></i> 80°C 高温洗 + 消毒浸泡</li>
+          <li><i class="fas fa-check-circle"></i> 十重健康关怀体系</li>
+          <li><i class="fas fa-check-circle"></i> 85% 噪音过滤</li>
+          <li><i class="fas fa-check-circle"></i> DJI Home App 全功能</li>
+        </ul>
+      </div>
+    </div>
+    <div class="showcase-img-row reveal" style="max-width:600px;margin:32px auto 0">
+      <div><img src="assets/slide55_图片 12_2.png" alt="P2"></div>
+      <div><img src="assets/slide55_图片 13_3.png" alt="A2"></div>
+    </div>
+    <div class="spec-table-wrap reveal" style="margin-top:32px">
+      <table class="spec-table">
+        <tr><th>对比项</th><th>ROMO 2 系列（新品）</th><th>前代 ROMO</th></tr>
+        <tr><td>基站类型</td><td class="highlight">水箱版标准基站 + 超薄上下水基站</td><td>标准基站（水箱+上下水）</td></tr>
+        <tr><td>感知配置</td><td class="highlight">面阵散斑激光雷达 + 双目鱼眼 + ToF + 摆臂雷达 + AI推理<span class="spec-new">NEW</span></td><td>双目鱼眼视觉传感器</td></tr>
+        <tr><td>避障</td><td class="highlight">智能避障 2.0 + 透明物体避障 + AI概念迁移<span class="spec-new">NEW</span></td><td>智能避障</td></tr>
+        <tr><td>越障</td><td class="highlight">单层 4.5cm / 双层 8.5cm</td><td>2.5cm</td></tr>
+        <tr><td>吸力</td><td class="highlight">36000Pa 智能增压</td><td>25000Pa</td></tr>
+        <tr><td>拖地</td><td class="highlight">12.4cm 超幅外摆 + 液体清洁优化</td><td>4.4cm 外扩拖布</td></tr>
+        <tr><td>静音</td><td class="highlight">85% 噪音过滤（32种降噪材料）</td><td>80% 噪音优化</td></tr>
+        <tr><td>基站自清洁</td><td class="highlight">365天免维护 + 污水箱自洁<span class="spec-new">NEW</span></td><td>200天基站免维护</td></tr>
+        <tr><td>拖布清洗</td><td class="highlight">80°C 热水洗 + 消毒浸泡洗<span class="spec-new">NEW</span></td><td>60°C 热水洗</td></tr>
+        <tr><td>价格</td><td class="highlight">ROMO P2 水箱版 4999 元起<br>ROMO A2 水箱版 5499 元起</td><td>4699 元起</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Q&A SECTION ====== -->
+<div class="section" id="qa">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">FAQ</div>
+      <h2 class="section-title mx-auto">常见问答</h2>
+      <p class="section-desc mx-auto">快速查询产品卖点话术，轻松应对客户咨询</p>
+    </div>
+    <div class="qa-search-wrap reveal"><i class="fas fa-search"></i><input type="text" placeholder="搜索问题..." id="qaSearch" oninput="filterQA()"></div>
+    <div class="qa-cat-bar reveal" id="qaCats"></div>
+    <div class="qa-list" id="qaList"></div>
+  </div>
+</div>
+
+<!-- ====== LIVE STREAMER SCRIPTS SECTION ====== -->
+<div class="section section-dark" id="scripts">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow" style="color:var(--orange)">Live Streamer Scripts</div>
+      <h2 class="section-title mx-auto" style="color:var(--white)">主播话术拆解 & 金句推荐</h2>
+      <p class="section-desc mx-auto">专为 ROMO 2 直播间设计的话术模板，覆盖从开场到逼单全流程。点击下方步骤切换话术内容。</p>
+    </div>
+
+    <!-- Flow Steps -->
+    <div class="script-flow reveal" id="scriptFlow">
+      <div class="script-step active" onclick="showScript(0)"><span class="step-num">STEP 01</span>开场留人</div>
+      <div class="script-step" onclick="showScript(1)"><span class="step-num">STEP 02</span>痛点切入</div>
+      <div class="script-step" onclick="showScript(2)"><span class="step-num">STEP 03</span>产品引出</div>
+      <div class="script-step" onclick="showScript(3)"><span class="step-num">STEP 04</span>核心卖点</div>
+      <div class="script-step" onclick="showScript(4)"><span class="step-num">STEP 05</span>场景演示</div>
+      <div class="script-step" onclick="showScript(5)"><span class="step-num">STEP 06</span>竞品对比</div>
+      <div class="script-step" onclick="showScript(6)"><span class="step-num">STEP 07</span>互动答疑</div>
+      <div class="script-step" onclick="showScript(7)"><span class="step-num">STEP 08</span>逼单成交</div>
+    </div>
+
+    <!-- Script Panels -->
+    <div id="scriptPanels">
+
+      <!-- Step 1: 开场留人 -->
+      <div class="script-panel active">
+        <h3><span class="step-icon" style="background:rgba(255,159,10,.15);color:var(--orange)"><i class="fas fa-bullhorn"></i></span> 开场留人</h3>
+        <p class="tip">目标：3-5秒抓住观众注意力，建立信任感，明确直播主题</p>
+        <div class="script-block">
+          <div class="label">欢迎话术（刚进直播间）</div>
+          <div class="words">"欢迎来到直播间！今天给大家带来一款真的能让你解放双手的扫地机器人——大疆 DJI ROMO 2！对，就是那个做大疆无人机的公司做的扫地机器人！"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">品牌背书话术</div>
+          <div class="words">"大家都知道大疆做无人机是全球第一，现在他们把无人机上的感知技术——对，就是那个毫米级避障——做到了扫地机器人上。这不是贴牌，是正儿八经的技术下放，大疆自己的品牌，大疆自己的研发。"</div>
+        </div>
+        <div class="script-block golden">
+          <div class="label">留人金句</div>
+          <div class="words">"今天只要你还在为扫地拖地头疼，还在纠结买哪款扫地机器人，你一定要在我直播间待到结束。因为今天这款 ROMO 2，可能会改变你对扫地机器人的所有认知。"</div>
+        </div>
+      </div>
+
+      <!-- Step 2: 痛点切入 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(255,59,48,.15);color:var(--red)"><i class="fas fa-heart-crack"></i></span> 痛点切入</h3>
+        <p class="tip">目标：引发共鸣，让观众意识到自己正在经历的清洁困扰</p>
+        <div class="script-block">
+          <div class="label">痛点共鸣话术</div>
+          <div class="words">"来，家人们你们有没有遇到过这种情况——你买的扫地机器人，不是被电线缠住了，就是把你家拖鞋推到沙发底下找不到，要不就是遇到地毯直接趴窝不动了？每天你还得帮它'擦屁股'，比你自己扫地还累？"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">养宠家庭痛点</div>
+          <div class="words">"养宠的家人们，你们的扫地机器人是不是把宠物的隔尿垫直接碾过去？推着宠物的食盆满屋跑？更可怕的——有没有碾到过不该碾的东西？不敢想了对吧？"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">基站维护痛点</div>
+          <div class="words">"还有那个基站，你买的时候销售说'免维护'，结果用了一周你就得掏污水箱、刷拖布盘，那个底盘上全是油垢，恶心吧？说好的解放双手呢？"</div>
+        </div>
+        <div class="script-block golden">
+          <div class="label">痛点金句</div>
+          <div class="words">"如果你的扫地机器人让你觉得——还不如自己扫，那不是你不会用，是它不够好。今天这款 ROMO 2，就是来解决问题的。"</div>
+        </div>
+      </div>
+
+      <!-- Step 3: 产品引出 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(0,113,227,.15);color:var(--blue)"><i class="fas fa-rocket"></i></span> 产品引出</h3>
+        <p class="tip">目标：自然引出 ROMO 2，建立产品权威感和期待感</p>
+        <div class="script-block">
+          <div class="label">产品引出话术</div>
+          <div class="words">"好，那我们来看今天的主角——DJI ROMO 2 系列 AI 超幅扫拖机器人。这是大疆的第二代扫地机器人，上一代就已经卖爆了，这一代直接是技术大升级。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">理念解读</div>
+          <div class="words">"ROMO 2 的理念是什么？四个字——'家净，即入佳境'。它不是一台冷冰冰的机器，大疆把它定义为你的'智能清洁伙伴'。从主动规避障碍到精准贴合边角，从强力拔除积尘到基站自清洁，每一项能力都是为了让科技服务于自在生活。"</div>
+        </div>
+        <div class="script-block golden">
+          <div class="label">引出金句</div>
+          <div class="words">"扫地机器人分两种：一种是你帮它收拾，一种是它帮你收拾。ROMO 2，就是第二种。"</div>
+        </div>
+      </div>
+
+      <!-- Step 4: 核心卖点 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(48,209,88,.15);color:var(--green)"><i class="fas fa-star"></i></span> 核心卖点讲解</h3>
+        <p class="tip">目标：用数据+场景化语言，深入讲解6大核心卖点</p>
+        <div class="script-block">
+          <div class="label">卖点1：36000Pa 聚能吸力</div>
+          <div class="words">"先说吸力——36000Pa！什么概念？上一代是 25000Pa，直接提升了 44%！AI 视觉机器学习能自动识别5种场景：地毯自动增压、液体污渍先拖后吸、颗粒垃圾强力吸入。你不需要去手动调节什么模式，它自己知道该怎么办。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">卖点2：123° 超幅外摆机械臂</div>
+          <div class="words">"这个机械臂是今天的重头戏！外摆角度 123°，上一代才 68°。外摆距离 12.4cm，上一代 4.4cm。一次外摆比上代多覆盖 4.5 厘米的边角区域！拖地效率提升 130%！而且机械臂上自带一颗激光雷达，边拖边感知，丝滑摆动不卡困。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">卖点3：智能避障 2.0（无人机同源）</div>
+          <div class="words">"这个是我最想讲的一点——避障用的是大疆无人机上的感知系统！面阵散斑投影激光雷达加双目鱼眼视觉传感器，2毫米粗的线缆都能识别绕开！玻璃茶几、镜子这些透明障碍物也不怕。更牛的是 AI 推理功能，从没见过的杂物它也能自主探测绕开，就像人一样会举一反三！"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">卖点4：8.5cm 双层动态越障</div>
+          <div class="words">"越障高度直接干到 8.5 厘米！上一代才 2.5 厘米！单层 4.5cm，双层 8.5cm。家里有门槛、滑轨、压边条的，完全不在话下。还有轮足抬升设计，经过地毯的时候不会把轻薄地毯卷走，这个细节太用心了。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">卖点5：365天基站免维护</div>
+          <div class="words">"听好了家人们——365 天基站免维护！纳米级微晶盾托盘，油垢根本粘不上。污水箱自动高压冲洗内壁，你不用手动掏洗。80°C 高温热水洗，上一代才 60°C。还有消毒浸泡洗是全新的功能！银离子 + 除臭 + UV杀菌 + 烘干，十重健康关怀，全链路抑菌。养宠家庭、有宝宝的家庭，这个太重要了。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">卖点6：85% 噪音过滤</div>
+          <div class="words">"最后一个痛点——噪音。ROMO 2 用了 32 种声学降噪材料，全链路覆盖。集尘的时候过滤 85% 的噪音！宝宝在睡觉你照样让它扫地，完全不扰民。"</div>
+        </div>
+      </div>
+
+      <!-- Step 5: 场景演示 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(88,86,214,.15);color:var(--purple)"><i class="fas fa-play-circle"></i></span> 场景演示话术</h3>
+        <p class="tip">目标：配合视频/实物演示，用场景化语言让观众身临其境</p>
+        <div class="script-block">
+          <div class="label">宠物场景演示</div>
+          <div class="words">"大家看好了，我在地上放了宠物隔尿垫、食盆、还有一团线缆。注意看——它来了，隔尿垫绕开了！食盆旁边丝滑通过！线缆？2毫米都能识别，更别说这个粗的了！全程不碰不碾不推，养宠的家人们，你们品品！"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">边角拖地演示</div>
+          <div class="words">"看这个墙角，上一代的拖布只能拖到这个位置（指4.4cm），墙根那一条根本拖不到，还得你手动补擦。ROMO 2 看好了——123° 外摆，直接贴到墙根！12.4 厘米！比上一代多出一大截！这才是真正的无死角！"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">地毯场景演示</div>
+          <div class="words">"大家看，机器检测到地毯了——自动增压！听到声音变化了吗？吸力直接拉满，把地毯深层的灰尘都吸出来。拖布呢？自动抬升！不弄湿地毯！上地毯下地毯一气呵成，全程不用你操心。"</div>
+        </div>
+        <div class="script-block golden">
+          <div class="label">演示金句</div>
+          <div class="words">"大家看到的不是特效，不是剪辑，这就是 ROMO 2 的日常。它不是'差不多'能避开障碍，它是精准、丝滑、优雅地绕开。"</div>
+        </div>
+      </div>
+
+      <!-- Step 6: 竞品对比 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(255,59,48,.15);color:var(--red)"><i class="fas fa-scale-balanced"></i></span> 竞品对比话术</h3>
+        <p class="tip">目标：不点名竞品，用数据和场景优势建立心智</p>
+        <div class="script-block">
+          <div class="label">品牌对比</div>
+          <div class="words">"大家买扫地机器人最怕什么？怕买到贴牌的、代工的，算法不行、避障靠撞。ROMO 2 是大疆自己研发的，感知算法和无人机是同一套技术体系。你买的是大疆 20 年的技术积累，不是什么新品牌刚入局拿公版方案拼凑的产品。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">避障对比（暗示竞品）</div>
+          <div class="words">"有些机器人的避障是这样的——'砰'撞上了才知道绕。ROMO 2 不一样，激光雷达加双目视觉加 ToF 加 AI 推理，远距离就能识别障碍物类型，提前规划路线绕开。2 毫米的线缆不碰，没见过的东西也能绕，透明玻璃都能看见——你去问问别家做不做得到。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">基站对比</div>
+          <div class="words">"有些品牌说免维护，结果一个月你就得洗底盘、掏污水箱。ROMO 2 的微晶盾托盘，纳米级致密结晶层，油垢根本粘不上！污水箱还能自动高压冲洗内壁。加上 80°C 高温洗、消毒浸泡、银离子除菌、UV 杀菌——十重健康关怀，365 天免维护是真正的免维护。"</div>
+        </div>
+        <div class="script-block golden">
+          <div class="label">对比金句</div>
+          <div class="words">"你可以去对比任何品牌任何型号，把避障、吸力、拖地、基站这四个维度拉出来比。ROMO 2 不是某一个点强，是全方位碾压。"</div>
+        </div>
+      </div>
+
+      <!-- Step 7: 互动答疑 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(0,113,227,.15);color:var(--blue)"><i class="fas fa-comments"></i></span> 互动答疑话术</h3>
+        <p class="tip">目标：高频问题秒回，增强信任感，延长停留时长</p>
+        <div class="script-block">
+          <div class="label">Q：多少钱？</div>
+          <div class="words">"ROMO 2 系列水箱版 4999 元起！旗舰款 ROMO P2 水箱版 4999，自动上下水版 5299。P2 和 A2 的核心功能是一模一样的，感知、清洁、基站全都一样强。今天直播间预约还有首发专属权益，一会我详细说！"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">Q：和上一代比升级了什么？</div>
+          <div class="words">"升级太多了！避障从普通避障升级到 2.0 加 AI 推理；越障从 2.5cm 到 8.5cm；吸力从 25000 到 36000Pa；拖布从 4.4cm 到 12.4cm；基站从 200 天免维护到 365 天；清洗从 60°C 到 80°C 还加了消毒浸泡。全方位升级，不是挤牙膏！"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">Q：大小户型都能用吗？</div>
+          <div class="words">"完全没问题！支持最多 4 张地图，多层楼的直接保存。安静单扫模式续航 3 小时，覆盖 178 平方米。而且有 55W 快充，回基站洗拖布的时候顺便充电，2.5 小时就充满了。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">Q：售后服务怎么样？</div>
+          <div class="words">"7 天无理由退货，15 天质量问题换新。还可以买'延保无忧'服务，机器人、基站、上下水套件全部延长 1 年保修，1 年内无限次免费维修。大疆官方售后，品质保障。"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">Q：养宠物推荐买吗？</div>
+          <div class="words">"养宠家庭我强烈推荐！避障 2.0 专门优化了宠物场景，隔尿垫、食盆、玩具精准识别绕开。还有宠物模式，加大吸力、降低速度、边角清洁更细致。毛发缠绕率降低 30% 以上。十重抑菌除菌，对有宝宝和宠物的家庭太友好了。"</div>
+        </div>
+      </div>
+
+      <!-- Step 8: 逼单成交 -->
+      <div class="script-panel">
+        <h3><span class="step-icon" style="background:rgba(255,159,10,.15);color:var(--orange)"><i class="fas fa-fire"></i></span> 逼单成交</h3>
+        <p class="tip">目标：制造紧迫感，引导立即预约/下单</p>
+        <div class="script-block">
+          <div class="label">价值重塑</div>
+          <div class="words">"家人们，我们算一笔账。你请一个阿姨，一个月至少 3000，一年 36000。ROMO 2 旗舰款 6499，用 3 年，一天才 5 块 9。而且它 365 天不用你手动维护基站，不用你掏污水箱、不用你洗拖布盘。这些时间精力省下来，值不值？"</div>
+        </div>
+        <div class="script-block">
+          <div class="label">首发紧迫感</div>
+          <div class="words">"ROMO 2 系列 6 月 11 日晚上 8 点正式发售！现在可以预约，首发期间有限时优惠，还有大疆官方商城专属权益——专属选购指引、一对一客户服务、包邮配送、DJI 币返点。错过首发，你就得多等、多花钱。"</div>
+        </div>
+        <div class="script-block closing">
+          <div class="label">终极逼单</div>
+          <div class="words">"家人们，今天我能给你们讲 3 个小时是因为这款产品真的值得。36000Pa 吸力、123° 机械臂、8.5cm 越障、365 天免维护——每一个参数都是行业顶级。大疆 20 年技术积累，不是新品牌能比的。ROMO P2 水箱版 4999 起，上下水版 5299，买一台真正能解放双手的扫地机器人。点下方链接预约，6月11日晚8点，我们不见不散！"</div>
+        </div>
+        <div class="script-block golden">
+          <div class="label">成交金句</div>
+          <div class="words">"今天买不买没关系，但这个链接你先收藏。等你用够了你那台天天撞墙、还得你帮它擦屁股的扫地机器人，你会回来的。ROMO 2 等你。"</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Golden Quotes Grid -->
+    <div style="margin-top:64px" class="reveal">
+      <div class="text-center" style="margin-bottom:32px">
+        <div class="section-eyebrow" style="color:var(--orange)">Golden Quotes</div>
+        <h2 style="font-size:clamp(28px,4vw,40px);font-weight:800;color:var(--white);letter-spacing:-.02em">金句推荐 · 随用随拿</h2>
+        <p style="color:rgba(255,255,255,.5);margin-top:8px;font-size:15px">直播间高频金句，适用于各种场景快速切换</p>
+      </div>
+      <div class="golden-grid" id="goldenGrid">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== EXAM SECTION ====== -->
+<div class="section section-gray" id="exam">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Exam</div>
+      <h2 class="section-title mx-auto">在线考试</h2>
+      <p class="section-desc mx-auto">检验学习成果，20 道题限时 60 分钟，80 分及格</p>
+    </div>
+    <div class="exam-container">
+      <div id="examStart" class="exam-start reveal">
+        <i class="fas fa-graduation-cap" style="font-size:56px;color:var(--blue);margin-bottom:16px;display:block"></i>
+        <h2>ROMO 2 产品知识考试</h2>
+        <p>共 20 题，总分 100 分，限时 60 分钟</p>
+        <div class="exam-rules">
+          <h4><i class="fas fa-list-check" style="color:var(--blue)"></i> 考试须知</h4>
+          <ul>
+            <li><i class="fas fa-check-circle"></i> 10 道单选（5分/题）+ 5 道多选（6分/题）+ 5 道判断（4分/题）</li>
+            <li><i class="fas fa-check-circle"></i> 考试时间 60 分钟，超时自动提交</li>
+            <li><i class="fas fa-check-circle"></i> 及格分数 80 分</li>
+            <li><i class="fas fa-check-circle"></i> 可多次考试，取最高分</li>
+            <li><i class="fas fa-check-circle"></i> 提交后可查看答案解析</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:20px"><label style="font-weight:600;margin-right:8px">姓名：</label><input type="text" id="examName" class="exam-name-input" placeholder="请输入姓名"></div>
+        <br>
+        <button class="btn-apple btn-blue" onclick="startExam()" style="font-size:17px;padding:16px 48px"><i class="fas fa-play"></i> 开始考试</button>
+      </div>
+      <div id="examBody" style="display:none">
+        <div class="exam-bar"><div class="exam-stat"><i class="fas fa-list"></i> 题目 <strong id="eProg">1/20</strong></div><div class="exam-stat"><i class="fas fa-check"></i> 已答 <strong id="eAns">0</strong></div><div class="exam-timer" id="eTimer"><i class="fas fa-clock"></i><span id="eTime">60:00</span></div></div>
+        <div class="exam-progress"><div class="exam-progress-fill" id="eBar"></div></div>
+        <div id="eQs"></div>
+        <div class="exam-actions"><button class="btn-apple btn-blue" onclick="submitExam()"><i class="fas fa-paper-plane"></i> 提交试卷</button></div>
+      </div>
+      <div class="exam-result" id="eResult">
+        <div class="res-circle" id="resCircle"><svg width="180" height="180"><circle cx="90" cy="90" r="80" fill="none" stroke="currentColor" stroke-width="8" stroke-dasharray="502.6" stroke-dashoffset="502.6" id="resArcBg" style="opacity:.15"/><circle cx="90" cy="90" r="80" fill="none" stroke="currentColor" stroke-width="8" stroke-dasharray="502.6" stroke-dashoffset="502.6" id="resArc"/></svg><div class="res-score" id="resScore">0</div><div class="res-label">分</div></div>
+        <h2 id="resTitle" style="font-size:24px;font-weight:800;margin-bottom:8px"></h2>
+        <p id="resMsg" style="color:var(--gray);margin-bottom:24px"></p>
+        <div class="res-stats"><div class="res-stat g"><div class="v" id="resOk">0</div><div class="l">答对</div></div><div class="res-stat r"><div class="v" id="resNo">0</div><div class="l">答错</div></div><div class="res-stat b"><div class="v" id="resT">0:00</div><div class="l">用时</div></div></div>
+        <div class="analysis" id="eAnalysis"></div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap">
+          <button class="btn-apple btn-blue" onclick="retakeExam()"><i class="fas fa-redo"></i> 重新考试</button>
+          <a href="#score" class="btn-apple btn-outline" onclick="scrollTo(document.getElementById('score'))"><i class="fas fa-chart-bar"></i> 查看成绩</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCORE SECTION ====== -->
+<div class="section" id="score">
+  <div class="section-inner">
+    <div class="text-center reveal">
+      <div class="section-eyebrow">Records</div>
+      <h2 class="section-title mx-auto">成绩记录</h2>
+    </div>
+    <div class="score-cards reveal" id="sCards">
+      <div class="score-card"><div class="n" id="sTotal">0</div><div class="l">考试次数</div></div>
+      <div class="score-card"><div class="n" id="sBest">-</div><div class="l">最高分</div></div>
+      <div class="score-card"><div class="n" id="sAvg">-</div><div class="l">平均分</div></div>
+      <div class="score-card"><div class="n" id="sPass">-</div><div class="l">通过率</div></div>
+    </div>
+    <div class="score-table-wrap reveal" id="sWrap">
+      <div class="score-filter-row">
+        <select id="sFilter" onchange="setScoreFilter(this.value)">
+          <option value="all">全部记录</option>
+          <option value="pass">只看通过</option>
+          <option value="fail">只看未通过</option>
+        </select>
+        <button class="btn-sm" onclick="loadScores()" title="刷新成绩"><i class="fas fa-sync-alt"></i> 刷新</button>
+      </div>
+      <div class="empty" id="sEmpty"><i class="fas fa-inbox"></i><p>暂无考试记录</p></div>
+      <table class="score-tbl" id="sTbl" style="display:none"><thead><tr><th>排名</th><th>姓名</th><th>得分</th><th>答对/总题</th><th>用时</th><th>日期</th><th>状态</th></tr></thead><tbody id="sBody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>CR820 ROMO 2 内部培训系统 &copy; 2026 DJI 零售培训组 | 6月11日 20:00 新品首发 | 仅供内部培训使用 严禁外传</p>
+</div>
+
+<script>
+// ===== NAV =====
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',scrollY>10)});
+function navTo(e,id){e.preventDefault();document.getElementById('navLinks').classList.remove('open');document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+
+// ===== SCROLL REVEAL =====
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ===== SCRIPTS TAB =====
+function showScript(idx){
+  document.querySelectorAll('.script-step').forEach((s,i)=>s.classList.toggle('active',i===idx));
+  const panels=document.querySelectorAll('.script-panel');
+  panels.forEach((p,i)=>{
+    if(i===idx){p.style.display='block';p.classList.add('active')}
+    else{p.style.display='none';p.classList.remove('active')}
+  });
+}
+
+// ===== GOLDEN QUOTES =====
+const goldenQuotes=[
+  {quote:'扫地机器人分两种：一种是你帮它收拾，一种是它帮你收拾。ROMO 2 就是第二种。',scene:'产品引出'},
+  {quote:'无人机同源感知系统——这不是贴牌，是大疆 20 年技术积累的降维打击。',scene:'品牌背书'},
+  {quote:'2毫米的线缆都能识别绕开，你的拖鞋、数据线、宠物玩具？小意思。',scene:'避障卖点'},
+  {quote:'吸力从 25000 到 36000Pa，不是挤牙膏，是直接拉开代差。',scene:'吸力卖点'},
+  {quote:'123° 外摆，12.4 厘米外扩——上一代能拖到这儿，ROMO 2 能拖到这儿（演示手势）。',scene:'拖地卖点'},
+  {quote:'365 天不用你掏污水箱、洗拖布盘——这才是真正的解放双手。',scene:'基站卖点'},
+  {quote:'32 种降噪材料，85% 噪音过滤——宝宝在隔壁睡觉，你照样让它扫地。',scene:'静音卖点'},
+  {quote:'你请阿姨一个月 3000，ROMO 2 一天 5 块 9——它还不用你管饭。',scene:'逼单成交'},
+  {quote:'买不买没关系，这个链接你先收藏。等你受够了帮你擦屁股的扫地机器人，你会回来的。',scene:'逼单成交'},
+  {quote:'今天只要你还在为扫地拖地头疼，你一定要待到我讲完。因为我可能改变你对扫地机器人的所有认知。',scene:'开场留人'},
+  {quote:'养宠家庭强烈推荐——隔尿垫不碾、食盆不推、毛发少缠 30%、全链路抑菌除臭。',scene:'养宠场景'},
+  {quote:'80°C 高温洗加消毒浸泡洗，前代才 60°C——你家的拖布从来没被洗得这么干净过。',scene:'基站卖点'},
+];
+document.getElementById('goldenGrid').innerHTML=goldenQuotes.map((q,i)=>`<div class="golden-card"><button class="copy-btn" onclick="copyQuote(this)" title="复制"><i class="fas fa-copy"></i></button><div class="quote">${q.quote}</div><div class="scene"><i class="fas fa-tag"></i>${q.scene}</div></div>`).join('');
+function copyQuote(btn){const text=btn.parentElement.querySelector('.quote').textContent;navigator.clipboard.writeText(text).then(()=>{btn.innerHTML='<i class="fas fa-check"></i>';setTimeout(()=>btn.innerHTML='<i class="fas fa-copy"></i>',1500)})}
+
+// ===== Q&A =====
+const qaData=[
+{cat:'外观设计',q:'ROMO 2 系列基站高度是多少？',a:'超薄基站高度仅 249mm，远低于行业平均水平。太空舱极简设计，半透明机器人展现内部机械美学。'},
+{cat:'外观设计',q:'基站有哪些个性化定制选项？',a:'舱门电动开关、舱门饰板黑白双色可选、舱门贴纸 DIY、基站门饰板黑白双色可选、基站门贴纸 DIY。'},
+{cat:'避障系统',q:'智能避障 2.0 用了哪些感知硬件？',a:'前方：面阵散斑投影激光雷达 + 双目鱼眼视觉传感器；侧面：面阵 ToF；机械臂上：独立激光雷达；底部：显尘灯。无人机同源技术！'},
+{cat:'避障系统',q:'能识别多细的线缆？',a:'可敏锐规避仅 2 毫米粗的线缆。还有 AI 推理功能，对从未见过的障碍物也能自主探测绕开。'},
+{cat:'避障系统',q:'透明物体能识别吗？',a:'能！玻璃茶几、落地窗、镜子等透明障碍物都能精准识别避让。'},
+{cat:'越障能力',q:'ROMO 2 的越障高度是多少？',a:'单层越障 4.5cm，双层越障 8.5cm。前代仅 2.5cm。还有轮足抬升设计，不会卷走轻薄地毯。三种门槛策略可选。'},
+{cat:'吸力系统',q:'ROMO 2 的最大吸力是多少？',a:'36000Pa 聚能吸力，前代 25000Pa，提升 44%。AI 视觉机器学习识别 5 种场景自动调节。'},
+{cat:'清洁系统',q:'什么是 DualSweep 双重覆盖结构？',a:'边刷与中刷端部重叠接力，特殊交错结构确保颗粒不打飞、毛发不缠绕。120° 双束边刷，毛发缠绕率降低 30%+。'},
+{cat:'清洁系统',q:'边刷摆出功能覆盖哪些场景？',a:'内直角墙角/墙根、复杂家具底部深处、密集家具腿边缘。'},
+{cat:'拖地系统',q:'ROMO 2 拖布外摆距离和角度？',a:'外扩距离 12.4cm（前代 4.4cm），外扩角度 123°（前代 68°），一次外摆多覆盖 4.5cm。拖地效率提升 130%。'},
+{cat:'拖地系统',q:'什么是凌空净拖？',a:'液体清洁能力更进一步，行走轮、边刷、万向轮均不弄脏机身。'},
+{cat:'拖地系统',q:'拖布摆臂避障雷达有什么作用？',a:'机械臂上独立激光雷达，拖地过程实时感知障碍物，丝滑摆动，减少卡困。'},
+{cat:'基站功能',q:'365 天免维护包含哪些技术？',a:'纳米级微晶盾托盘、污水箱高压自清洁、16mm 超大吸污口、四路高压水柱清洗。'},
+{cat:'基站功能',q:'ROMO 2 拖布清洗温度？',a:'80°C 高温热水洗（前代 60°C），新增消毒浸泡洗功能（除菌清洁液按比例注入）。'},
+{cat:'基站功能',q:'十重健康关怀体系是什么？',a:'水路六重：清水箱银离子、去污清洁液、除菌清洁液、高温清洗、银离子除菌拖布、污水箱除臭。风路四重：尘盒高温烘干、UV灯杀菌、滤网拦截、抗菌除臭尘袋。'},
+{cat:'静音体验',q:'ROMO 2 降噪水平？',a:'32 种声学降噪材料全链路覆盖，集尘时过滤 85% 噪音（前代 80%）。'},
+{cat:'App功能',q:'脏污热力图是什么？',a:'DJI Home App 中精细呈现地面脏污情况，地图上一站式个性化编辑，基于新布局智能优化清洁路径。（ROMO 2 新增功能）'},
+{cat:'App功能',q:'如何开启宠物模式？',a:'DJI Home App → 设备设置 → 我家有宠物。加大吸力、降低速度、边角清洁更细致。'},
+{cat:'App功能',q:'充电和续航参数？',a:'55W 快充，充满 2.5h；安静单扫续航 3h（100% 至 12%），覆盖约 178 平方米。'},
+{cat:'App功能',q:'如何使用语音助手？',a:'呼唤"小莫小莫"，一句话开启清洁，适配第三方智能音箱。'},
+{cat:'App功能',q:'支持几层地图？',a:'最多 4 张地图，适配不同楼层。'},
+{cat:'App功能',q:'视频通话安全吗？',a:'开启需密码，使用时数据加密，不用时可彻底关闭。'},
+{cat:'价格信息',q:'ROMO 2 系列价格？',a:'ROMO A2 水箱版 5499 元、自动上下水版 5999 元；ROMO P2 水箱版 4999 元、自动上下水版 5299 元。6月11日20:00发售。'},
+{cat:'价格信息',q:'P2 和 A2 有什么区别？',a:'两款核心功能一致（感知、清洁、基站等），P2 定位更高配，价格贵 500 元。具体差异以大疆官方公布为准。'},
+{cat:'售后保障',q:'售后政策？',a:'7天无理由退货、15天质量问题换新。可选"延保无忧"增值服务：机器人+基站+上下水套件延长1年保修，1年内无限次保内免费维修。'},
+{cat:'竞品对比',q:'ROMO 2 与前代主要区别？',a:'避障 2.0+AI推理+透明物体识别、越障 8.5cm、吸力 36000Pa、拖布 12.4cm/123°、80°C高温洗+消毒浸泡、365天免维护、降噪85%、脏污热力图。'},
+];
+let qaFilter='全部';
+function renderQA(){const cats=['全部',...new Set(qaData.map(q=>q.cat))];document.getElementById('qaCats').innerHTML=cats.map(c=>`<button class="qa-cat-pill ${c===qaFilter?'active':''}" onclick="setQACat('${c}')">${c}</button>`).join('');filterQA()}
+function setQACat(c){qaFilter=c;renderQA()}
+function filterQA(){const s=document.getElementById('qaSearch').value.toLowerCase();const f=qaData.filter(q=>{return(qaFilter==='全部'||q.cat===qaFilter)&&(!s||q.q.toLowerCase().includes(s)||q.a.toLowerCase().includes(s))});document.getElementById('qaList').innerHTML=f.length?f.map(q=>`<div class="qa-item" onclick="this.classList.toggle('open')"><div class="qa-q"><span class="badge">Q</span><span>${q.q}</span></div><div class="qa-a">${q.a}</div></div>`).join(''):'<div class="empty"><i class="fas fa-search"></i><p>没有找到匹配的问题</p></div>'}
+
+// ===== EXAM =====
+const examQ=[
+{type:'single',score:5,q:'ROMO 2 系列水箱版起售价是多少？',opts:['4699元','4999元','5499元','5999元'],ans:1,exp:'ROMO P2 水箱版 4999 元起（系列最低价）；ROMO A2 水箱版 5499 元起。'},
+{type:'single',score:5,q:'ROMO 2 系列正式发售日期是？',opts:['5月11日','5月20日','6月1日','6月11日'],ans:3,exp:'6月11日20:00正式发售。'},
+{type:'single',score:5,q:'ROMO 2 的最大吸力是多少？',opts:['25000Pa','30000Pa','36000Pa','40000Pa'],ans:2,exp:'36000Pa 聚能吸力，前代为 25000Pa，提升 44%。'},
+{type:'single',score:5,q:'智能避障能识别多细的线缆？',opts:['1mm','2mm','5mm','10mm'],ans:1,exp:'可敏锐规避仅 2 毫米粗的线缆。'},
+{type:'single',score:5,q:'ROMO 2 双层越障高度可达多少？',opts:['4.5cm','6cm','8.5cm','10cm'],ans:2,exp:'双层 8.5cm，单层 4.5cm，前代仅 2.5cm。'},
+{type:'single',score:5,q:'ROMO 2 拖布外扩角度是多少？',opts:['68°','90°','110°','123°'],ans:3,exp:'123°，前代为 68°。'},
+{type:'single',score:5,q:'ROMO 2 拖布清洗热水温度？',opts:['60°C','70°C','80°C','90°C'],ans:2,exp:'80°C 高温热水洗，前代为 60°C。'},
+{type:'single',score:5,q:'噪音过滤最高可达多少？',opts:['75%','80%','85%','90%'],ans:2,exp:'85% 噪音过滤，用了 32 种声学降噪材料。'},
+{type:'single',score:5,q:'毛发缠绕率降低了多少以上？',opts:['10%','20%','30%','50%'],ans:2,exp:'120° 双毛束双束边刷设计，毛发缠绕率降低 30% 以上。'},
+{type:'single',score:5,q:'快充功率和充满时间？',opts:['45W/3h','55W/2.5h','65W/2h','75W/1.5h'],ans:1,exp:'55W 快充，充满仅需 2.5 小时。'},
+{type:'multi',score:6,q:'智能避障 2.0 优化了哪些场景？（多选）',opts:['宠物场景','复杂家具场景','暗光场景','透明物体识别'],ans:[0,1,2,3],exp:'四大场景全覆盖：宠物、复杂家具、暗光、透明物体。'},
+{type:'multi',score:6,q:'AI 智能清洁决策包括哪些能力？（多选）',opts:['地毯自动增压','液体污渍应对','优先走主通道','智能复拖'],ans:[0,1,2,3],exp:'四项 AI 决策能力全部支持。'},
+{type:'multi',score:6,q:'十重健康关怀体系包括哪些？（多选）',opts:['银离子模块','UV灯杀菌','消毒浸泡洗','高温烘干'],ans:[0,1,2,3],exp:'水路六重 + 风路四重 = 十重。'},
+{type:'multi',score:6,q:'ROMO 2 感知硬件包括？（多选）',opts:['面阵散斑投影激光雷达','双目鱼眼视觉','面阵ToF','机械臂激光雷达'],ans:[0,1,2,3],exp:'四种感知硬件全方位覆盖。'},
+{type:'multi',score:6,q:'以下哪些是 ROMO 2 新增功能？（多选）',opts:['AI推理避障','消毒浸泡洗','污水箱自清洁','脏污热力图'],ans:[0,1,2,3],exp:'四项均为 ROMO 2 新增功能。'},
+{type:'judge',score:4,q:'ROMO 2 支持透明物体避障识别。',opts:['正确','错误'],ans:0,exp:'支持透明物体避障，能识别玻璃茶几、镜子等。'},
+{type:'judge',score:4,q:'ROMO 2 越障高度与前代相同，都是 2.5cm。',opts:['正确','错误'],ans:1,exp:'单层 4.5cm，双层 8.5cm，远超前代 2.5cm。'},
+{type:'judge',score:4,q:'ROMO P2 水箱版价格为 4999 元。',opts:['正确','错误'],ans:0,exp:'ROMO P2 水箱版 4999 元，ROMO A2 水箱版 5499 元。'},
+{type:'judge',score:4,q:'ROMO 2 的感知系统与无人机无关。',opts:['正确','错误'],ans:1,exp:'感知系统源于大疆旗舰无人机同源技术，是核心技术下放。'},
+{type:'judge',score:4,q:'ROMO 2 基站采用纳米级微晶盾材质托盘。',opts:['正确','错误'],ans:0,exp:'纳米级致密结晶层，污渍油垢难附着，清水一冲即净。'},
+];
+
+let ES={started:false,answers:{},timer:null,timeLeft:3600,startTime:null};
+
+function startExam(){const n=document.getElementById('examName').value.trim();if(!n){alert('请输入姓名');return}ES={started:true,answers:{},timer:null,timeLeft:3600,startTime:Date.now(),name:n};document.getElementById('examStart').style.display='none';document.getElementById('examBody').style.display='block';document.getElementById('eResult').classList.remove('show');renderQs();startTmr()}
+function renderQs(){const L=['A','B','C','D','E','F'];document.getElementById('eQs').innerHTML=examQ.map((q,i)=>{const tc=q.type==='single'?'s':q.type==='multi'?'m':'j';const tl=q.type==='single'?'单选':q.type==='multi'?'多选':'判断';return`<div class="eq" id="eq${i}"><div class="eq-head"><div class="eq-num">${i+1}</div><span class="eq-type ${tc}">${tl}</span><span class="eq-score">${q.score}分</span></div><div class="eq-text">${q.q}</div><div class="eq-opts">${q.opts.map((o,j)=>`<div class="eq-opt" data-q="${i}" data-o="${j}" onclick="selOpt(${i},${j},'${q.type}')"><span class="eq-letter">${L[j]}</span><span>${o}</span></div>`).join('')}</div></div>`}).join('');updProg()}
+function selOpt(qi,oi,type){if(type==='multi'){if(!ES.answers[qi])ES.answers[qi]=[];const idx=ES.answers[qi].indexOf(oi);idx>-1?ES.answers[qi].splice(idx,1):ES.answers[qi].push(oi)}else{ES.answers[qi]=oi}document.querySelectorAll(`[data-q="${qi}"]`).forEach(el=>{const o=+el.dataset.o;if(type==='multi')el.classList.toggle('sel',ES.answers[qi].includes(o));else el.classList.toggle('sel',ES.answers[qi]===o)});updProg()}
+function updProg(){const a=examQ.filter((_,i)=>ES.answers[i]!==undefined&&(Array.isArray(ES.answers[i])?ES.answers[i].length>0:true)).length;document.getElementById('eProg').textContent=`${a}/${examQ.length}`;document.getElementById('eAns').textContent=a;document.getElementById('eBar').style.width=`${a/examQ.length*100}%`}
+function startTmr(){updTimeDisp();ES.timer=setInterval(()=>{ES.timeLeft--;updTimeDisp();if(ES.timeLeft<=0){clearInterval(ES.timer);submitExam(1)}},1000)}
+function updTimeDisp(){const m=Math.floor(ES.timeLeft/60),s=ES.timeLeft%60;document.getElementById('eTime').textContent=`${m}:${String(s).padStart(2,'0')}`;document.getElementById('eTimer').classList.toggle('warn',ES.timeLeft<=300)}
+function submitExam(to){if(!to){const u=examQ.filter((_,i)=>ES.answers[i]===undefined||(Array.isArray(ES.answers[i])&&!ES.answers[i].length)).length;if(u>0&&!confirm(`还有 ${u} 题未答，确定提交？`))return}clearInterval(ES.timer);let ts=0,ok=0,no=0;examQ.forEach((q,i)=>{const ua=ES.answers[i];let c;if(q.type==='multi'){c=(ua||[]).sort().toString()===q.ans.sort().toString()}else{c=ua===q.ans}c?(ts+=q.score,ok++):no++});const el=Math.round((Date.now()-ES.startTime)/1000);const r={name:ES.name,score:ts,correct:ok,wrong:no,total:examQ.length,time:el,date:new Date().toISOString()};saveScore(r).then(()=>{scores.push(r);showRes(ts,ok,no,el)})}
+function showRes(sc,ok,no,t){document.getElementById('examBody').style.display='none';const re=document.getElementById('eResult');re.classList.add('show');const p=sc>=80;const ci=document.getElementById('resCircle');ci.className='res-circle '+(p?'pass':'fail');document.getElementById('resScore').textContent=sc;document.getElementById('resOk').textContent=ok;document.getElementById('resNo').textContent=no;const m=Math.floor(t/60),s=t%60;document.getElementById('resT').textContent=`${m}:${String(s).padStart(2,'0')}`;document.getElementById('resTitle').textContent=p?'恭喜通过！':'未达到及格线';document.getElementById('resMsg').textContent=p?'您已掌握 ROMO 2 产品核心知识。':'建议回顾知识库后重新考试，及格线 80 分。';const arc=document.getElementById('resArc');const off=502.6*(1-sc/100);setTimeout(()=>{arc.style.transition='stroke-dashoffset 1.5s ease';arc.style.strokeDashoffset=off},100);showAna()}
+function showAna(){const L=['A','B','C','D','E','F'];document.getElementById('eAnalysis').innerHTML='<h3>答题解析</h3>'+examQ.map((q,i)=>{const ua=ES.answers[i];let c;if(q.type==='multi'){c=(ua||[]).sort().toString()===q.ans.sort().toString()}else{c=ua===q.ans}const tl=q.type==='single'?'单选':q.type==='multi'?'多选':'判断';let yt,ct;if(q.type==='multi'){yt=(ua||[]).length?(ua||[]).map(j=>L[j]).join(', '):'未作答';ct=q.ans.map(j=>L[j]).join(', ')}else{yt=ua!==undefined?L[ua]:'未作答';ct=L[q.ans]}return`<div class="ana-item ${c?'ok':'no'}"><div class="ana-q"><span style="color:${c?'#16a34a':'#dc2626'};margin-right:6px">${c?'<i class="fas fa-check-circle"></i>':'<i class="fas fa-times-circle"></i>'}</span>[${tl}] ${i+1}. ${q.q}</div><div style="font-size:13px;color:${c?'#16a34a':'#dc2626'}">你的答案：${yt}</div>${!c?`<div style="font-size:14px;color:#16a34a;font-weight:600"><i class="fas fa-check"></i> 正确答案：${ct}</div>`:''}<div class="ana-explain"><i class="fas fa-info-circle" style="margin-right:6px"></i>${q.exp}</div></div>`}).join('')}
+function retakeExam(){document.getElementById('eResult').classList.remove('show');document.getElementById('examStart').style.display='block';ES={started:false,answers:{},timer:null,timeLeft:3600,startTime:null};document.getElementById('eTime').textContent='60:00';document.getElementById('eTimer').classList.remove('warn');const a=document.getElementById('resArc');a.style.transition='none';a.style.strokeDashoffset=502.6}
+
+// ===== SCOREBOARD =====
+let scores = [];
+
+function loadScores() {
+  fetch('/api/scores')
+    .then(r => r.json())
+    .then(data => { scores = data; renderScores(); })
+    .catch(() => { scores = []; renderScores(); });
+}
+
+function saveScore(record) {
+  return fetch('/api/scores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(record)
+  }).then(r => r.json());
+}
+
+function renderScores(f) {
+  if (f === undefined) f = document.getElementById ? (document.getElementById('sFilter') ? document.getElementById('sFilter').value : 'all') : 'all';
+  const sorted = [...scores].sort((a, b) => b.score - a.score);
+  const filtered = f === 'all' ? sorted : f === 'pass' ? sorted.filter(s => s.score >= 80) : sorted.filter(s => s.score < 80);
+  document.getElementById('sTotal').textContent = scores.length;
+  if (scores.length) {
+    document.getElementById('sBest').textContent = Math.max(...scores.map(s => s.score));
+    document.getElementById('sAvg').textContent = Math.round(scores.reduce((a, b) => a + b.score, 0) / scores.length);
+    document.getElementById('sPass').textContent = Math.round(scores.filter(s => s.score >= 80).length / scores.length * 100) + '%';
+  } else {
+    document.getElementById('sBest').textContent = '-';
+    document.getElementById('sAvg').textContent = '-';
+    document.getElementById('sPass').textContent = '-';
+  }
+  if (filtered.length) {
+    document.getElementById('sEmpty').style.display = 'none';
+    document.getElementById('sTbl').style.display = 'table';
+    document.getElementById('sBody').innerHTML = filtered.map((s, i) => {
+      const p = s.score >= 80;
+      const m = Math.floor(s.time / 60), sec = s.time % 60;
+      const d = new Date(s.date);
+      return `<tr><td>${i + 1}</td><td><strong>${s.name}</strong></td><td><strong style="color:${p ? '#16a34a' : '#dc2626'}">${s.score}</strong></td><td>${s.correct}/${s.total}</td><td>${m}:${String(sec).padStart(2, '0')}</td><td>${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</td><td><span class="score-badge ${p ? 'badge-pass' : 'badge-fail'}">${p ? '通过' : '未通过'}</span></td></tr>`;
+    }).join('');
+  } else {
+    document.getElementById('sEmpty').style.display = 'block';
+    document.getElementById('sTbl').style.display = 'none';
+  }
+}
+
+function setScoreFilter(f) {
+  renderScores(f);
+}
+
+// ===== INIT =====
+renderQA();
+loadScores();
+setTimeout(()=>document.querySelectorAll('.reveal:not(.visible)').forEach(el=>obs.observe(el)),100);
+</script>
+</body>
+</html>
